@@ -5,8 +5,6 @@ class Clam():
 
     def __init__(self):
         self.args = sys.argv[1:]
-        if self.args == []:
-            self.args = ["/home/zane/audio_vis/audio_vis_clam.py"]
         self.files = []
         self.py_ext = '.py'     # For python files
         self.wav_ext = '.wav'   # Wav audio files (just for testing)

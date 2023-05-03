@@ -15,12 +15,11 @@ We do this for all the files given to the clam
 import subprocess
 
 class Folder():
-    # TODO: Need to run the vim folder at 10 commands per subprocess call
     # TODO: Run the folding  in a different subprocess and output to user when process ends
 
     def __init__(self, files: list[str]) -> None:
         self.files = files
-        self.max_folds = 10 # DO NOT INCREASE THIS, IT IS THE MAX
+        self.max_folds = 6 # DO NOT INCREASE THIS, IT IS THE MAX
         self.fold()
 
     def fold(self) -> None:
@@ -42,14 +41,30 @@ class Folder():
                 print('\t' , range_)
                 #self.vim_fold(range_, file)
 
-                is_max = ((i % self.max_folds) == 9)
-                is_tail = (i == len(range_list))
+                range_list.append(range_)
+                
+                mod = (i % self.max_folds)
+                is_max = (mod == self.max_folds - 1)
 
-                if is_max or is_tail:
+                # Checks if remaining elements are lesser than max
+                is_tail = (self.max_folds > len(index_list) - i)
+                # if list has lesser elements than max_folds, starts in tail state
+                is_start_as_tail = (len(index_list) < self.max_folds) 
+
+                if is_tail:
+                    # This helps us not do a tail operation before max has been reached
+                    # Needed for overlapping max and tail conditions
+                    is_tail &= not (range_list[0] == index_list[0]) 
+
+                if is_max:
+                    print("Max:  ", end="")
                     self.vim_fold(range_list, file)
-                else:
-                    range_list.append(range_)
-
+                    range_list = []
+                elif is_tail or is_start_as_tail:
+                    print("Tail: ", end="")
+                    range_list = index_list[i:]
+                    self.vim_fold(range_list, file)
+                    break
 
     def load_file(self, file_name: str) -> list[str]:
         """
@@ -63,7 +78,7 @@ class Folder():
         return line_array[0]
 
     def make_index_list(self, line_array: list[str]):
-        print("Making index list")
+        print("Making index list...", end="")
         start = 0
         end = 0
 
@@ -94,6 +109,7 @@ class Folder():
                 indent_count = self.get_indent_count(line)
                 search_for_start = False
 
+        print("Done!")
         return index_list
 
     def get_indent_count(self, line: str) -> int:
@@ -134,8 +150,6 @@ class Folder():
         quit_ = '-c "q" '
         
         cmd_str = vim + loadview + fold_range + mkview + quit_ + file_name
-
-        print(cmd_str)
 
         self.run_as_str(cmd_str)
 
