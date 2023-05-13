@@ -19,7 +19,6 @@ class Folder():
 
     def __init__(self, files: list[str]) -> None:
         self.files = files
-        # TODO: implement the use of first fold to not use load view all the time
         self.first_fold = True
         self.fold()
 
@@ -39,7 +38,7 @@ class Folder():
 
             for range_ in index_list:
 
-                print(range_)
+                print('\t' , range_)
                 self.vim_fold(range_, file)
 
                 if self.first_fold:
@@ -74,9 +73,11 @@ class Folder():
             is_not_empty_line = len(line) > 2
             is_not_start = start < line_count
 
-            is_end_function = is_lower_indent and is_not_empty_line and is_not_start
+            is_end_function = is_lower_indent 
+            is_end_function &= is_not_empty_line 
+            is_end_function &= is_not_start
 
-            if is_end_function and start != 0:
+            if is_end_function and start != 0 and start != end:
                 end = line_count - 1
                 index_list.append([start, end])
                 search_for_start = True
