@@ -14,6 +14,8 @@ We do this for all the files given to the clam
 import subprocess
 
 class Folder():
+    # TODO: Need to run the vim folder at 10 commands per subprocess call
+    # TODO: Run the folding  in a different subprocess and output to user when process ends
 
     def __init__(self, files: list[str]) -> None:
         self.files = files
