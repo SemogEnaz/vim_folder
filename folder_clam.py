@@ -33,8 +33,14 @@ class Clam():
 
             # If the arg is a directory, get file names in dir and call recursively
             elif self.is_dir(arg):
+
                 files = self.ls(arg)
-                files = [arg + '/' + file for file in files]
+                dir_char = ''
+
+                if arg.find('/') == -1:
+                    dir_char = '/'
+
+                files = [arg + dir_char + file for file in files]
                 self.get_files(files)
 
     def is_dir(self, path) -> bool:
