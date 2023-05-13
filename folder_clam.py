@@ -5,6 +5,8 @@ class Clam():
 
     def __init__(self):
         self.args = sys.argv[1:]
+        if self.args == []:
+            self.args = ["/home/zane/audio_vis/audio_vis_clam.py"]
         self.files = []
         self.py_ext = '.py'     # For python files
         self.wav_ext = '.wav'   # Wav audio files (just for testing)
@@ -37,7 +39,7 @@ class Clam():
                 files = self.ls(arg)
                 dir_char = ''
 
-                if arg.find('/') == -1:
+                if arg.rfind('/') > 1:
                     dir_char = '/'
 
                 files = [arg + dir_char + file for file in files]
