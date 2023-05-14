@@ -11,6 +11,7 @@ We then call vim to make the folds at the indexes an makeview to save the folds.
 
 We do this for all the files given to the clam
 """
+
 import subprocess
 
 class Folder():
@@ -19,7 +20,7 @@ class Folder():
 
     def __init__(self, files: list[str]) -> None:
         self.files = files
-        self.first_fold = True
+        self.max_folds = 10 # DO NOT INCREASE THIS, IT IS THE MAX
         self.fold()
 
     def fold(self) -> None:
@@ -34,15 +35,21 @@ class Folder():
             array = self.load_file(file)
             index_list = self.make_index_list(array)
 
-            self.first_fold = True
+            range_list = []
 
-            for range_ in index_list:
+            for i, range_ in enumerate(index_list):
 
                 print('\t' , range_)
-                self.vim_fold(range_, file)
+                #self.vim_fold(range_, file)
 
-                if self.first_fold:
-                    self.first_fold = False
+                is_max = ((i % self.max_folds) == 9)
+                is_tail = (i == len(range_list))
+
+                if is_max or is_tail:
+                    self.vim_fold(range_list, file)
+                else:
+                    range_list.append(range_)
+
 
     def load_file(self, file_name: str) -> list[str]:
         """
@@ -106,9 +113,9 @@ class Folder():
 
         cmd_str = vim + mkview + quit_ + file_name
 
-        self.run(cmd_str)
+        self.run_as_str(cmd_str)
 
-    def vim_fold(self, range: list[int, int], file_name: str) -> None:
+    def vim_fold(self, ranges: list[list[int, int]], file_name: str) -> None:
         """
         command we are using:
             :{range}fo
@@ -118,14 +125,34 @@ class Folder():
 
         vim = 'vim '
         loadview = '-c loadview '
-        fold_range = f'-c "{range[0]};{range[1]}fold" '
+
+        # TODO: Run 9 commands for fold in one call to vim
+        #fold_range = f'-c "{range[0]};{range[1]}fold" '
+        fold_range = self.make_fold_cmd(ranges)
+        
         mkview = '-c "mkview" '
         quit_ = '-c "q" '
         
         cmd_str = vim + loadview + fold_range + mkview + quit_ + file_name
 
-        self.run(cmd_str)
+        print(cmd_str)
 
-    def run(self, args: str) -> None:
+        self.run_as_str(cmd_str)
+
+    def make_fold_cmd(self, index_list_segment: list[list[int, int]]) -> str:
+        """
+        Takes segment of ten or less ranges and returns them parsed as vim fold commands
+        """
+        print("Making fold command ", index_list_segment)
+        fold_cmd = ''
+
+        for range_ in index_list_segment:
+            fold_cmd += f'-c "{range_[0]};{range_[1]}fold" ' 
+
+        return fold_cmd
+
+    def run_as_list(self, args: list[str]) -> None:
+        subprocess.run(args)
+
+    def run_as_str(self, args: str) -> None:
         subprocess.run(args, shell=True)
-        
